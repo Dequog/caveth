@@ -1,247 +1,25 @@
+mod bullet;
+pub mod enemy;
+mod exit_button;
+mod player;
+mod score;
+
+use bullet::Bullet;
+use enemy::Enemy;
+use exit_button::ExitButton;
+use player::Player;
+use score::Score;
+
 use macroquad::prelude::*;
 
-const PLAYER_SIZE: Vec2 = const_vec2!([80.0, 44.0]);
-const PLAYER_SPEED: f32 = 500.0;
-
-const BULLET_SPEED: f32 = 500.0;
-const BULLET_SIZE: f32 = 25.0;
 const BULLET_COOLDOWN_TIME: f32 = 5.0;
 
-const ENEMY_SIZE: f32 = 50.0;
-const ENEMY_SPEED: f32 = 500.0;
 const ENEMY_SPAWN_TIME: f32 = 50.0;
 
 enum GameState {
     Menu,
     Playing,
     GameOver,
-}
-
-struct Player {
-    rect: Rect,
-    texture: Texture2D,
-    can_shoot: bool,
-}
-
-impl Player {
-    async fn new() -> Self {
-        Self {
-            // We are using a rect to represent to player bounds
-            rect: Rect::new(
-                0.0,
-                screen_height() * 0.5 - PLAYER_SIZE[1] * 2.0,
-                PLAYER_SIZE[0],
-                PLAYER_SIZE[1],
-            ),
-            texture: load_texture("res/player.png").await.unwrap(),
-            can_shoot: true,
-        }
-    }
-
-    fn update(&mut self, dt: f32) {
-        let vel = match (
-            is_key_down(KeyCode::Up) || is_key_down(KeyCode::W) || is_key_down(KeyCode::K),
-            is_key_down(KeyCode::Down) || is_key_down(KeyCode::S) || is_key_down(KeyCode::K),
-        ) {
-            // If the down arrow, W, or K is pressed set velocity to -1
-            (true, false) => -1.0,
-
-            // If the down arrow, S, or J is pressed set velocity to 1
-            (false, true) => 1.0,
-            _ => 0.0,
-        };
-
-        // Update the rect position
-        self.rect.y += vel * dt * PLAYER_SPEED;
-
-        // Check if the rect is out of bounds
-
-        // Left side
-        if self.rect.y < 0.0 {
-            self.rect.y = 0.0;
-        }
-
-        // Right side
-        if self.rect.y > screen_height() - self.rect.h {
-            self.rect.y = screen_height() - self.rect.h;
-        }
-    }
-
-    fn draw(&self) {
-        // Draw the player
-        draw_texture(self.texture, self.rect.x, self.rect.y, WHITE);
-    }
-
-    fn reset(&mut self) {
-        self.can_shoot = true;
-
-        // Reset the rect position
-        self.rect.y = screen_height() * 0.5 - PLAYER_SIZE[1] * 2.0;
-    }
-}
-
-struct Bullet {
-    rect: Rect,
-    texture: Texture2D,
-}
-
-impl Bullet {
-    async fn new(pos: Vec2) -> Self {
-        Self {
-            rect: Rect::new(pos.x, pos.y, BULLET_SIZE, BULLET_SIZE),
-            texture: load_texture("res/bullet.png").await.unwrap(),
-        }
-    }
-
-    fn update(&mut self, dt: f32) {
-        // Update the rect position
-        self.rect.x += dt * BULLET_SPEED
-    }
-
-    fn draw(&self) {
-        // Draw the bullet
-        draw_texture(self.texture, self.rect.x, self.rect.y, WHITE);
-    }
-}
-
-struct Enemy {
-    rect: Rect,
-    texture: Texture2D,
-    is_alive: bool,
-    has_given_points: bool,
-}
-
-impl Enemy {
-    async fn new(pos: Vec2) -> Self {
-        Self {
-            rect: Rect::new(pos.x, pos.y, ENEMY_SIZE, ENEMY_SIZE),
-            texture: load_texture("res/enemy.png").await.unwrap(),
-            is_alive: true,
-            has_given_points: false,
-        }
-    }
-
-    fn update(&mut self, dt: f32) {
-        if self.is_alive {
-            // Update the rect position
-            self.rect.x -= dt * ENEMY_SPEED;
-        }
-    }
-
-    fn draw(&self) {
-        if self.is_alive {
-            // Draw the enemy
-            draw_texture(self.texture, self.rect.x, self.rect.y, WHITE);
-        }
-    }
-}
-
-struct Score {
-    font: Font,
-    score: i32,
-    high_score: i32,
-}
-
-impl Score {
-    async fn new() -> Self {
-        Self {
-            font: load_ttf_font("res/Roboto-Medium.ttf").await.unwrap(),
-            score: 0,
-            high_score: 0,
-        }
-    }
-
-    fn increment(&mut self) {
-        // Increment the score
-        self.score += 1;
-
-        // Set the high score
-        self.high_score = std::cmp::max(self.high_score, self.score);
-    }
-
-    fn reset(&mut self) {
-        // set the high score
-        self.high_score = std::cmp::max(self.high_score, self.score);
-
-        // Reset the score
-        self.score = 0;
-    }
-
-    fn draw(&mut self) {
-        // Draw the Score
-        draw_text_ex(
-            self.score.to_string().as_str(),
-            screen_width() * 0.5 - 7.5 - self.score.to_string().chars().count() as f32 * 7.5,
-            40.0,
-            TextParams {
-                font: self.font,
-                font_size: 30,
-                color: BLACK,
-                font_scale: 1.0,
-                font_scale_aspect: 1.0,
-            },
-        );
-    }
-}
-
-fn is_collision(a: &mut Rect, b: &mut Rect) -> bool {
-    // If a collides with b
-    if let Some(_intersection) = a.intersect(*b) {
-        return true;
-    }
-
-    false
-}
-
-struct ExitButton {
-    rect: Rect,
-    text: String,
-    is_pressed: bool,
-    font: Font,
-}
-
-impl ExitButton {
-    async fn new(text: String) -> Self {
-        Self {
-            rect: Rect::new(screen_width() * 2.5, 10.0, 100.0, 25.0),
-            is_pressed: false,
-            text,
-            font: load_ttf_font("res/Roboto-Medium.ttf").await.unwrap(),
-        }
-    }
-
-    fn check_for_press(&mut self) {
-        if is_mouse_button_down(MouseButton::Left) {
-            // Check if the cursor is in the button area
-            if self
-                .rect
-                .contains(vec2(mouse_position().0, mouse_position().1))
-            {
-                self.is_pressed = true;
-            }
-        } else if is_mouse_button_released(MouseButton::Left) {
-            self.is_pressed = false;
-        }
-    }
-
-    fn draw(&self) {
-        // Draw button background
-        draw_rectangle(self.rect.x, self.rect.y, self.rect.w, self.rect.h, GRAY);
-
-        // Draw button text
-        draw_text_ex(
-            self.text.as_str(),
-            self.rect.x + self.rect.w * 0.5 - (self.text.chars().count() - 1) as f32 * 7.5 * 0.5,
-            self.rect.y + self.rect.h * 0.5 + 7.5,
-            TextParams {
-                font: self.font,
-                font_size: 15,
-                color: BLACK,
-                font_scale: 1.0,
-                font_scale_aspect: 1.0,
-            },
-        );
-    }
 }
 
 #[macroquad::main("Caveth")]
@@ -339,7 +117,7 @@ async fn main() {
                 for enemy in &mut enemies {
                     // Check if a bullet has collided with the enemy
                     for bullet in &mut bullets {
-                        if is_collision(&mut bullet.rect, &mut enemy.rect) {
+                        if bullet.is_collision(enemy) {
                             enemy.is_alive = false;
 
                             if !enemy.has_given_points {
@@ -354,9 +132,7 @@ async fn main() {
                     enemy.update(get_frame_time());
 
                     // Check if enemy is reached the end of the screen or has touched player
-                    if enemy.rect.x < 0.0 - player.rect.w
-                        || is_collision(&mut player.rect, &mut enemy.rect)
-                    {
+                    if enemy.rect.x < 0.0 - player.rect.w || player.is_collision(enemy) {
                         game_state = GameState::GameOver;
                     }
                 }
