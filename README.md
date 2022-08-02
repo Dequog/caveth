@@ -13,4 +13,5 @@ Down arrow, S: Move Down
 
 Space or Mouse Click: Shoot
 
-
+# Goal
+Shoot the enemies without running into them or letting them get past you
