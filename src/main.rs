@@ -1,5 +1,5 @@
 mod bullet;
-pub mod enemy;
+mod enemy;
 mod exit_button;
 mod player;
 mod score;
