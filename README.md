@@ -7,8 +7,10 @@ The name comes from **CA**nnon **V**s **E**nemy **TH**ings
 
 # Controls
 
-Up arrow, W, or K: Move Up
-Down arrow, S, or J: Move Down
+Up arrow, W: Move Up
+
+Down arrow, S: Move Down
+
 Space or Mouse Click: Shoot
 
 
