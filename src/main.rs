@@ -28,7 +28,7 @@ async fn main() {
     let mut exit_button = ExitButton::new("Hold to Quit".to_string()).await;
     let mut score = Score::new().await;
 
-    // There will be a lot of bullets and enemies, so we put them in a vector
+    // There will be a lot of bullets and enemies, so they go into a vector
     let mut bullets: Vec<Bullet> = Vec::new();
     let mut enemies: Vec<Enemy> = Vec::new();
 
