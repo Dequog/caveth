@@ -15,3 +15,5 @@ Space or Mouse Click: Shoot
 
 # Goal
 Shoot the enemies without running into them or letting them get past you
+
+![Screenshot](https://i.ibb.co/3yc2pWK/Screenshot-from-2022-08-03-10-07-21.png)
