@@ -1,5 +1,5 @@
 # Caveth
-A fun game where you can shoot enemies
+A fun game where you can shoot enemies with a cannon
 
 The name comes from **CA**nnon **V**s **E**nemy **TH**ings
 
